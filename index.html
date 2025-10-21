@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Daily Planner (PWA)</title>
+    
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+
+    <link rel="stylesheet" href="style-planner.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="planner-container">
+        <header class="planner-header">
+            <h1 class="title">Jadwal Fokus Harian</h1>
+            <p class="subtitle">Target: 5 Jam Belajar Intensif (Data diambil dari JSON)</p>
+        </header>
+
+        <section class="schedule-timeline" id="schedule-timeline-container">
+            </section>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Pendaftaran Service Worker untuk mengaktifkan PWA dan fitur offline
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Memanggil fungsi rendering dari app.js setelah DOM dimuat
+        document.addEventListener('DOMContentLoaded', renderSchedule);
+    </script>
+
+</body>
+</html>
