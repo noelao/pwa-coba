@@ -13,6 +13,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="pwa-install-modal" class="pwa-modal-overlay">
+        <div class="pwa-modal-content">
+            <h2>✨ Tambahkan Jadwal ke Layar Utama</h2>
+            <p>Nikmati pengalaman seperti aplikasi, bahkan saat offline!</p>
+            <button id="install-button" class="btn cta-btn">Instal Sekarang</button>
+            <button id="close-modal-button" class="btn close-btn">Nanti Saja</button>
+        </div>
+    </div>
 
     <div class="planner-container">
         <header class="planner-header">
@@ -25,8 +33,66 @@
     </div>
 
     <script src="app.js"></script>
-    <script>
-        // Pendaftaran Service Worker untuk mengaktifkan PWA dan fitur offline
+
+<script>
+    // Variabel global untuk menyimpan event instalasi dari browser
+    let deferredPrompt;
+
+    // --- 1. LOGIKA PWA DAN PROMPT ---
+
+    // Event ini dipicu oleh browser ketika semua kriteria PWA terpenuhi
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Mencegah browser menampilkan prompt default-nya sendiri
+        e.preventDefault(); 
+        
+        // Menyimpan event agar bisa dipanggil nanti
+        deferredPrompt = e;
+        
+        // Memunculkan modal custom kita
+        const modal = document.getElementById('pwa-install-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    });
+
+    // --- 2. LOGIKA KLIK TOMBOL MODAL ---
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        // Panggil fungsi rendering jadwal
+        renderSchedule();
+
+        const installButton = document.getElementById('install-button');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const modal = document.getElementById('pwa-install-modal');
+
+        // Handler untuk tombol 'Instal Sekarang'
+        if (installButton) {
+            installButton.addEventListener('click', () => {
+                // Pastikan deferredPrompt sudah tersimpan
+                if (deferredPrompt) {
+                    // Panggil prompt instalasi yang disimpan
+                    deferredPrompt.prompt();
+                    
+                    // Sembunyikan modal setelah instalasi dipicu
+                    modal.style.display = 'none';
+
+                    // Opsional: Lacak respons pengguna (untuk analitik)
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        console.log('User response to the install prompt:', choiceResult.outcome);
+                        deferredPrompt = null;
+                    });
+                }
+            });
+        }
+
+        // Handler untuk tombol 'Nanti Saja'
+        if (closeModalButton) {
+            closeModalButton.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        // --- 3. REGISTRASI SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -38,10 +104,8 @@
                     });
             });
         }
-        
-        // Memanggil fungsi rendering dari app.js setelah DOM dimuat
-        document.addEventListener('DOMContentLoaded', renderSchedule);
-    </script>
+    });
+</script>
 
 </body>
 </html>
